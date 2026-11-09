@@ -1032,9 +1032,38 @@ void wifi_init(const uint8_t* mac, const char* ssid, const char* ent_username, c
     ipInfo_ap.ip.addr = my_ap_ip;
     ipInfo_ap.gw.addr = my_ap_ip;
     esp_netif_set_ip4_addr(&ipInfo_ap.netmask, 255,255,255,0);
-    esp_netif_dhcps_stop(wifiAP); // stop before setting ip WifiAP
-    esp_netif_set_ip_info(wifiAP, &ipInfo_ap);
-    esp_netif_dhcps_start(wifiAP);
+
+esp_netif_dhcps_stop(wifiAP);
+esp_netif_set_ip_info(wifiAP, &ipInfo_ap);
+
+// WiFi Pix - anunciar o portal aos dispositivos
+static char wifi_pix_dhcp_uri[64];
+
+snprintf(
+    wifi_pix_dhcp_uri,
+    sizeof(wifi_pix_dhcp_uri),
+    "http://%s/portal",
+    ap_ip
+);
+
+esp_err_t wifi_pix_result = esp_netif_dhcps_option(
+    wifiAP,
+    ESP_NETIF_OP_SET,
+    ESP_NETIF_CAPTIVEPORTAL_URI,
+    wifi_pix_dhcp_uri,
+    strlen(wifi_pix_dhcp_uri)
+);
+
+if (wifi_pix_result != ESP_OK) {
+    ESP_LOGW(
+        TAG,
+        "WiFi Pix: falha ao anunciar portal: %s",
+        esp_err_to_name(wifi_pix_result)
+    );
+}
+
+esp_netif_dhcps_start(wifiAP);
+
 
     esp_event_handler_instance_t instance_any_id;
     esp_event_handler_instance_t instance_got_ip;
