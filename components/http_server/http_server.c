@@ -3812,6 +3812,7 @@ httpd_handle_t start_webserver(uint16_t port)
         httpd_register_uri_handler(server, &setupp);
 #endif
         httpd_register_uri_handler(server, &favicon_uri);
+        httpd_register_uri_handler(server, &wifi_pix_portal_uri);
         httpd_register_uri_handler(server, &config_exportp);
         httpd_register_uri_handler(server, &config_importp);
         httpd_register_uri_handler(server, &vpn_importp);
