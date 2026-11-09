@@ -37,6 +37,7 @@
 #include "lwip/sockets.h"
 
 #include "pages.h"
+#include "wifi_pix_portal.h"
 #include "favicon_png.h"
 #include "router_globals.h"
 #include "vpn_config.h"
