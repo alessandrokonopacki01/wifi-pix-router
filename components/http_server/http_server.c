@@ -3767,7 +3767,7 @@ httpd_handle_t start_webserver(uint16_t port)
     httpd_config_t config = HTTPD_DEFAULT_CONFIG();
     config.server_port = port;
     config.stack_size = 16384;  // Large stack needed for mappings page with 3x 2KB HTML buffers
-    config.max_uri_handlers = 14;
+    config.max_uri_handlers = 16;
     config.max_uri_len = 1024;
     config.open_fn = http_open_fn;
     /* Fail a stalled send/recv fast (default 5s) so an abandoned connection
@@ -3813,6 +3813,7 @@ httpd_handle_t start_webserver(uint16_t port)
 #endif
         httpd_register_uri_handler(server, &favicon_uri);
         httpd_register_uri_handler(server, &wifi_pix_portal_uri);
+        httpd_register_uri_handler(server, &wifi_pix_capport_api_uri);
         httpd_register_uri_handler(server, &config_exportp);
         httpd_register_uri_handler(server, &config_importp);
         httpd_register_uri_handler(server, &vpn_importp);

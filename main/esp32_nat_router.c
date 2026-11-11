@@ -1042,7 +1042,7 @@ static char wifi_pix_dhcp_uri[64];
 snprintf(
     wifi_pix_dhcp_uri,
     sizeof(wifi_pix_dhcp_uri),
-    "http://%s/portal",
+    "http://%s/capport-api",
     ap_ip
 );
 
