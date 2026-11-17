@@ -1162,13 +1162,10 @@ esp_netif_dhcps_start(wifiAP);
     // Set DNS server address for DHCP clients.
     // When no STA is configured, point clients at the AP itself so the
     // captive-portal DNS server can intercept all queries.
-    if (strlen(ssid) > 0) {
-        const char *eff_dns = effective_ap_dns();
-        const char *dns_src = eff_dns ? eff_dns : "1.1.1.1";
-        dnsserver.ip.u_addr.ip4.addr = esp_ip4addr_aton(dns_src);
-    } else {
-        dnsserver.ip.u_addr.ip4.addr = my_ap_ip;
-    }
+
+/* WiFi Pix: DNS local para teste do portal cativo */
+dnsserver.ip.u_addr.ip4.addr = my_ap_ip;
+
     dnsserver.ip.type = ESP_IPADDR_TYPE_V4;
     esp_netif_set_dns_info(wifiAP, ESP_NETIF_DNS_MAIN, &dnsserver);
 

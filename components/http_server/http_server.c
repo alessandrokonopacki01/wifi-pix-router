@@ -3827,12 +3827,18 @@ httpd_handle_t start_webserver(uint16_t port)
             web_server_start_captive_dns();
         }
 #else
-        // Start captive portal DNS only when no upstream WiFi is configured
-        if (ssid == NULL || strlen(ssid) == 0) {
-            ESP_LOGI(TAG, "No STA configured, starting captive portal DNS");
-            httpd_register_err_handler(server, HTTPD_404_NOT_FOUND, captive_redirect_handler);
-            web_server_start_captive_dns();
-        }
+        
+// WiFi Pix: ativar deteccao do portal experimental
+ESP_LOGI(TAG, "WiFi Pix: iniciando DNS cativo");
+
+httpd_register_err_handler(
+    server,
+    HTTPD_404_NOT_FOUND,
+    captive_redirect_handler
+);
+
+web_server_start_captive_dns();
+
 #endif
 
         return server;
@@ -3929,7 +3935,7 @@ static esp_err_t captive_redirect_handler(httpd_req_t *req, httpd_err_code_t err
 {
     if (captive_redirect_url[0] == '\0') {
         snprintf(captive_redirect_url, sizeof(captive_redirect_url),
-                 "http://" IPSTR "/", IP2STR((esp_ip4_addr_t *)&my_ap_ip));
+                 "http://" IPSTR "/portal", IP2STR((esp_ip4_addr_t *)&my_ap_ip));
     }
     httpd_resp_set_status(req, "302 Found");
     httpd_resp_set_hdr(req, "Location", captive_redirect_url);
