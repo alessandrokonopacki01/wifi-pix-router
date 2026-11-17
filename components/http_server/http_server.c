@@ -1205,9 +1205,67 @@ static const httpd_uri_t favicon_uri = {
 };
 
 /* Index page GET handler - System Status with navigation */
+
 static esp_err_t index_get_handler(httpd_req_t *req)
 {
+    // WIFI PIX - Redirecionamento por Host HTTP
+    // Preserva o painel quando acessado diretamente
+    // pelo IP do roteador.
+
+    if (req->method == HTTP_GET) {
+        char host[128] = {0};
+
+        if (httpd_req_get_hdr_value_str(
+                req, "Host", host, sizeof(host)) == ESP_OK) {
+
+            char router_ip[32];
+
+            snprintf(
+                router_ip,
+                sizeof(router_ip),
+                IPSTR,
+                IP2STR((esp_ip4_addr_t *)&my_ap_ip)
+            );
+
+bool local_host =
+    strcmp(host, router_ip) == 0 ||
+    (strncmp(host, router_ip, strlen(router_ip)) == 0 &&
+     host[strlen(router_ip)] == ':') ||
+    strcasecmp(host, "esp32-nat-router.local") == 0 ||
+    strcasecmp(host, "esp32-nat-router.local:80") == 0;
+
+            if (!local_host &&
+                strchr(host, '.') != NULL) {
+
+                ESP_LOGI(
+                    TAG,
+                    "WiFi Pix: redirecionando Host %s",
+                    host
+                );
+
+                httpd_resp_set_status(
+                    req, "302 Found"
+                );
+
+                httpd_resp_set_hdr(
+                    req,
+                    "Location",
+                    "http://192.168.4.1/portal"
+                );
+
+                httpd_resp_set_hdr(
+                    req,
+                    "Cache-Control",
+                    "no-store"
+                );
+
+                return httpd_resp_send(req, NULL, 0);
+            }
+        }
+    }
+
     resume_sta_if_scan_idle();
+
     char* buf = NULL;
     size_t buf_len = 0;
     char param[128];
