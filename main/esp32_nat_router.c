@@ -711,16 +711,31 @@ static void wifi_event_handler(void* arg, esp_event_base_t event_base,
             ip_napt_enable(my_ap_ip, 1);
         delete_portmap_tab();
         apply_portmap_tab();
-        const char *eff_dns = effective_ap_dns();
-        if (eff_dns) {
-            dns.ip.u_addr.ip4.addr = esp_ip4addr_aton(eff_dns);
-            dns.ip.type = ESP_IPADDR_TYPE_V4;
-            esp_netif_set_dns_info(wifiAP, ESP_NETIF_DNS_MAIN, &dns);
-            ESP_LOGI(TAG, "AP DNS set to %s", eff_dns);
-        } else if (esp_netif_get_dns_info(wifiSTA, ESP_NETIF_DNS_MAIN, &dns) == ESP_OK) {
-            esp_netif_set_dns_info(wifiAP, ESP_NETIF_DNS_MAIN, &dns);
-            ESP_LOGI(TAG, "set dns to:" IPSTR, IP2STR(&(dns.ip.u_addr.ip4)));
-        }
+        
+/* WiFi Pix: manter o DNS local mesmo apos conectar ao hotspot */
+dns.ip.u_addr.ip4.addr = my_ap_ip;
+dns.ip.type = ESP_IPADDR_TYPE_V4;
+
+esp_err_t wifi_pix_dns_result = esp_netif_set_dns_info(
+    wifiAP,
+    ESP_NETIF_DNS_MAIN,
+    &dns
+);
+
+ESP_LOGI(
+    TAG,
+    "WiFi Pix: DNS local configurado: " IPSTR,
+    IP2STR(&dns.ip.u_addr.ip4)
+);
+
+if (wifi_pix_dns_result != ESP_OK) {
+    ESP_LOGE(
+        TAG,
+        "WiFi Pix: erro ao configurar DNS: %s",
+        esp_err_to_name(wifi_pix_dns_result)
+    );
+}
+
 
         // esp_netif just (re)set netif_default to the uplink on this GOT_IP. If
         // the VPN is up in route-all mode, restore the tunnel as the default
